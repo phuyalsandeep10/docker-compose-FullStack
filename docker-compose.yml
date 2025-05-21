@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    ports:
+      - "3308:3306"  # Maps container 3306 to host 3308 (avoid conflicts)
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - todo-net
+
+  backend:
+    build: ./backend
+    restart: on-failure
+    environment:
+      DB_HOST: mysql
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "5000:5000"  # Maps container 5000 to host 5001
+    networks:
+      - todo-net
+
+  frontend:
+    build: ./frontend
+    restart: on-failure
+    ports:
+      - "3000:80"  # Maps container 80 to host 3000
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - todo-net
+
+volumes:
+  mysql-data:
+
+networks:
+  todo-net:
