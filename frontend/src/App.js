@@ -153,7 +153,7 @@ function App() {
                     borderRadius: '5px',
                   }}
                 >
-                  🗑️ Delete
+                  🗑️ Delete all
                 </button>
               </>
             )}
