@@ -1,44 +1,49 @@
-name: CI/CD Pipeline
+name: Full Stack ToDo App Deployment
 
 on:
   push:
-    branches: [ main ]  # Trigger on push to main branch
+    branches: [main]
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      DOCKER_USER: ${{ secrets.DOCKER_USERNAME }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
+
     steps:
-      - name: Checkout code
+      - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Login to DockerHub
+      - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ env.DOCKER_USER }}
+          password: ${{ env.DOCKER_PASS }}
 
-      - name: Build and push frontend
+      - name: Build and push backend image
         run: |
-          docker build -t yourdockerhubuser/frontend:latest ./frontend
-          docker push yourdockerhubuser/frontend:latest
+          docker build -t $DOCKER_USER/todo-backend:latest ./backend
+          docker push $DOCKER_USER/todo-backend:latest
 
-      - name: Build and push backend
+      - name: Build and push frontend image
         run: |
-          docker build -t yourdockerhubuser/backend:latest ./backend
-          docker push yourdockerhubuser/backend:latest
+          docker build -t $DOCKER_USER/todo-frontend:latest ./frontend
+          docker push $DOCKER_USER/todo-frontend:latest
 
-      - name: Deploy on server via SSH
+      - name: SSH and deploy on remote server
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull yourdockerhubuser/frontend:latest
-            docker pull yourdockerhubuser/backend:latest
-            docker-compose -f /path/to/your/docker-compose.yml up -d
-
+            cd /home/ubuntu/todo-app  # Path where your docker-compose.yml is stored
+            docker pull $DOCKER_USER/todo-backend:latest
+            docker pull $DOCKER_USER/todo-frontend:latest
+            docker-compose down
+            docker-compose up -d --remove-orphans
