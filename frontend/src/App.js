@@ -1,151 +1,118 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+const API_URL = process.env.REACT_APP_API_URL;
 
-function App() {
+export default function App() {
   const [todos, setTodos] = useState([]);
-  const [title, setTitle] = useState('');
-  const [editId, setEditId] = useState(null);
-  const [editTitle, setEditTitle] = useState('');
+  const [newTitle, setNewTitle] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const fetchTodos = async () => {
-    const res = await axios.get(`${API_BASE}/api/todos`);
-    setTodos(res.data);
-  };
-
-  const addTodo = async () => {
-    if (!title.trim()) return;
-    const res = await axios.post(`${API_BASE}/api/todos`, { title });
-    setTodos([...todos, res.data]);
-    setTitle('');
-  };
-
-  const deleteTodo = async (id) => {
-    await axios.delete(`${API_BASE}/api/todos/${id}`);
-    setTodos(todos.filter(todo => todo.id !== id));
-  };
-
-  const startEdit = (todo) => {
-    setEditId(todo.id);
-    setEditTitle(todo.title);
-  };
-
-  const saveEdit = async (id) => {
-    const res = await axios.put(`${API_BASE}/api/todos/${id}`, { title: editTitle });
-    setTodos(todos.map(todo => (todo.id === id ? res.data : todo)));
-    setEditId(null);
-  };
+  async function fetchTodos() {
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/todos`);
+      if (!res.ok) throw new Error('Failed to fetch todos');
+      const data = await res.json();
+      setTodos(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   useEffect(() => {
     fetchTodos();
   }, []);
 
+  async function addTodo() {
+    if (!newTitle.trim()) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${API_URL}/todos`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle }),
+      });
+      if (!res.ok) throw new Error('Failed to add todo');
+      const todo = await res.json();
+      setTodos(prev => [todo, ...prev]);
+      setNewTitle('');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function toggleCompleted(id, completed) {
+    try {
+      const res = await fetch(`${API_URL}/todos/${id}/completed`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ completed: !completed }),
+      });
+      if (!res.ok) throw new Error('Failed to update todo');
+      const updated = await res.json();
+      setTodos(prev =>
+        prev.map(todo => (todo.id === id ? { ...todo, completed: updated.completed } : todo))
+      );
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function deleteTodo(id) {
+    try {
+      const res = await fetch(`${API_URL}/todos/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Failed to delete todo');
+      setTodos(prev => prev.filter(todo => todo.id !== id));
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   return (
-    <div style={{ padding: '2rem', maxWidth: '600px', margin: 'auto', fontFamily: 'Arial, sans-serif' }}>
-      <h1 style={{ textAlign: 'center', color: '#2c3e50' }}>✅ My Enhanced Task List</h1>
-
-      <div style={{ display: 'flex', marginBottom: '1rem' }}>
-        <input
-          type="text"
-          placeholder="Add a new task here..."
-          value={title}
-          onChange={e => setTitle(e.target.value)}
-          style={{ padding: '0.5rem', flex: 1, fontSize: '1rem', border: '1px solid #ccc', borderRadius: '5px' }}
-        />
-        <button
-          onClick={addTodo}
-          style={{
-            marginLeft: '1rem',
-            padding: '0.5rem 1rem',
-            fontSize: '1rem',
-            backgroundColor: '#2ecc71',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-          }}
-        >
-          ➕ Add Task
-        </button>
-      </div>
-
+    <div style={{ maxWidth: 600, margin: 'auto', padding: 20 }}>
+      <h1>to-do-app</h1>
+      <input
+        value={newTitle}
+        onChange={e => setNewTitle(e.target.value)}
+        placeholder="Enter new todo"
+        onKeyDown={e => e.key === 'Enter' && addTodo()}
+        disabled={loading}
+      />
+      <button onClick={addTodo} disabled={loading || !newTitle.trim()}>
+        Add
+      </button>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {loading && <p>Loading...</p>}
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {todos.map(todo => (
           <li
             key={todo.id}
             style={{
-              padding: '0.75rem',
-              marginBottom: '0.5rem',
-              backgroundColor: '#f9f9f9',
-              borderRadius: '5px',
+              textDecoration: todo.completed ? 'line-through' : 'none',
+              margin: '10px 0',
               display: 'flex',
               alignItems: 'center',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+              justifyContent: 'space-between',
             }}
           >
-            {editId === todo.id ? (
-              <>
-                <input
-                  value={editTitle}
-                  onChange={e => setEditTitle(e.target.value)}
-                  style={{
-                    flex: 1,
-                    padding: '0.4rem',
-                    fontSize: '1rem',
-                    border: '1px solid #ccc',
-                    borderRadius: '5px',
-                  }}
-                />
-                <button
-                  onClick={() => saveEdit(todo.id)}
-                  style={{
-                    marginLeft: '0.5rem',
-                    padding: '0.4rem 0.8rem',
-                    backgroundColor: '#3498db',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                  }}
-                >
-                  💾 Save
-                </button>
-              </>
-            ) : (
-              <>
-                <span style={{ flex: 1, fontSize: '1rem' }}>{todo.title}</span>
-                <button
-                  onClick={() => startEdit(todo)}
-                  style={{
-                    marginLeft: '0.5rem',
-                    padding: '0.4rem 0.8rem',
-                    backgroundColor: '#f1c40f',
-                    color: '#333',
-                    border: 'none',
-                    borderRadius: '5px',
-                  }}
-                >
-                  ✏️ Edit
-                </button>
-                <button
-                  onClick={() => deleteTodo(todo.id)}
-                  style={{
-                    marginLeft: '0.5rem',
-                    padding: '0.4rem 0.8rem',
-                    backgroundColor: '#e74c3c',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                  }}
-                >
-                  🗑️ Delete
-                </button>
-              </>
-            )}
+            <span
+              style={{ cursor: 'pointer' }}
+              onClick={() => toggleCompleted(todo.id, todo.completed)}
+              title="Toggle completed"
+            >
+              {todo.title}
+            </span>
+            <button onClick={() => deleteTodo(todo.id)} style={{ marginLeft: 10 }}>
+              Delete
+            </button>
           </li>
         ))}
       </ul>
     </div>
   );
 }
-
-export default App;
