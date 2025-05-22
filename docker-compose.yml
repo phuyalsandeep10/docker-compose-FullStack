@@ -12,7 +12,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     ports:
-      - "3308:3306"  # Maps container 3306 to host 3308 (avoid conflicts)
+      - "3308:3306"  # Host 3308 maps to MySQL's 3306 (dev only)
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -22,7 +22,9 @@ services:
       - todo-net
 
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     restart: on-failure
     environment:
       DB_HOST: mysql
@@ -30,21 +32,31 @@ services:
       DB_PASSWORD: ${MYSQL_PASSWORD}
       DB_NAME: ${MYSQL_DATABASE}
     depends_on:
-      mysql:
-        condition: service_healthy
+      - mysql  # No `condition`, use healthcheck + wait-for in container
     ports:
-      - "5000:5000"  # Maps container 5000 to host 5001
+      - "5000:5000"  # Host 5000 maps to backend container
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - todo-net
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
     restart: on-failure
     ports:
-      - "3000:80"  # Maps container 80 to host 3000
+      - "3000:80"  # Host 3000 maps to frontend container
     depends_on:
-      backend:
-        condition: service_started
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
     networks:
       - todo-net
 
