@@ -1,41 +1,38 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
+const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:5000';
+
 function App() {
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState('');
   const [editId, setEditId] = useState(null);
   const [editTitle, setEditTitle] = useState('');
 
-  // Fetch all todos
   const fetchTodos = async () => {
-    const res = await axios.get('http://3.111.23.31:5000/api/todos');
+    const res = await axios.get(`${API_BASE}/api/todos`);
     setTodos(res.data);
   };
 
-  // Add a todo
   const addTodo = async () => {
     if (!title.trim()) return;
-    const res = await axios.post('http://3.111.23.31:5000/api/todos', { title });
+    const res = await axios.post(`${API_BASE}/api/todos`, { title });
     setTodos([...todos, res.data]);
     setTitle('');
   };
 
-  // Delete a todo
   const deleteTodo = async (id) => {
-    await axios.delete(`http://3.111.23.31:5000/api/todos/${id}`);
+    await axios.delete(`${API_BASE}/api/todos/${id}`);
     setTodos(todos.filter(todo => todo.id !== id));
   };
 
-  // Start editing a todo
   const startEdit = (todo) => {
     setEditId(todo.id);
     setEditTitle(todo.title);
   };
 
-  // Save edited todo
   const saveEdit = async (id) => {
-    const res = await axios.put(`http://3.111.23.31:5000/api/todos/${id}`, { title: editTitle });
+    const res = await axios.put(`${API_BASE}/api/todos/${id}`, { title: editTitle });
     setTodos(todos.map(todo => (todo.id === id ? res.data : todo)));
     setEditId(null);
   };
@@ -45,14 +42,7 @@ function App() {
   }, []);
 
   return (
-    <div
-      style={{
-        padding: '2rem',
-        maxWidth: '600px',
-        margin: 'auto',
-        fontFamily: 'Arial, sans-serif',
-      }}
-    >
+    <div style={{ padding: '2rem', maxWidth: '600px', margin: 'auto', fontFamily: 'Arial, sans-serif' }}>
       <h1 style={{ textAlign: 'center', color: '#2c3e50' }}>✅ My Enhanced Task List</h1>
 
       <div style={{ display: 'flex', marginBottom: '1rem' }}>
@@ -61,13 +51,7 @@ function App() {
           placeholder="Add a new task here..."
           value={title}
           onChange={e => setTitle(e.target.value)}
-          style={{
-            padding: '0.5rem',
-            flex: 1,
-            fontSize: '1rem',
-            border: '1px solid #ccc',
-            borderRadius: '5px',
-          }}
+          style={{ padding: '0.5rem', flex: 1, fontSize: '1rem', border: '1px solid #ccc', borderRadius: '5px' }}
         />
         <button
           onClick={addTodo}
@@ -153,7 +137,7 @@ function App() {
                     borderRadius: '5px',
                   }}
                 >
-                  🗑️ Delete all
+                  🗑️ Delete
                 </button>
               </>
             )}
