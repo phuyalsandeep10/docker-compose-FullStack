@@ -47,4 +47,4 @@ jobs:
             docker pull $DOCKER_USER/todo-backend:latest
             docker pull $DOCKER_USER/todo-frontend:latest
             docker-compose down
-            docker-compose up -d --remove-orphans
+            docker-compose up -d 

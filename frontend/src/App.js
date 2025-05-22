@@ -9,21 +9,21 @@ function App() {
 
   // Fetch all todos
   const fetchTodos = async () => {
-    const res = await axios.get('http://localhost:5000/api/todos');
+    const res = await axios.get('http://3.111.23.31:5000/api/todos');
     setTodos(res.data);
   };
 
   // Add a todo
   const addTodo = async () => {
     if (!title.trim()) return;
-    const res = await axios.post('http://localhost:5000/api/todos', { title });
+    const res = await axios.post('http://3.111.23.31:5000/api/todos', { title });
     setTodos([...todos, res.data]);
     setTitle('');
   };
 
   // Delete a todo
   const deleteTodo = async (id) => {
-    await axios.delete(`http://localhost:5000/api/todos/${id}`);
+    await axios.delete(`http://3.111.23.31:5000/api/todos/${id}`);
     setTodos(todos.filter(todo => todo.id !== id));
   };
 
@@ -35,7 +35,7 @@ function App() {
 
   // Save edited todo
   const saveEdit = async (id) => {
-    const res = await axios.put(`http://localhost:5000/api/todos/${id}`, { title: editTitle });
+    const res = await axios.put(`http://3.111.23.31:5000/api/todos/${id}`, { title: editTitle });
     setTodos(todos.map(todo => (todo.id === id ? res.data : todo)));
     setEditId(null);
   };
