@@ -42,7 +42,8 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            cd /home/ubuntu/todo-app  # Path where your docker-compose.yml is stored
+            export DOCKER_USER=${{ secrets.DOCKER_USERNAME }}
+            cd /home/ubuntu/to-do-app
             docker pull $DOCKER_USER/todo-backend:latest
             docker pull $DOCKER_USER/todo-frontend:latest
             docker-compose down
