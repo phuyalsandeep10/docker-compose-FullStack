@@ -22,7 +22,7 @@ services:
       - todo-net
 
   backend:
-    image: abhishekkarki88/to-do-app-backend
+    image: abhishekkarki88/todo-backend
     restart: on-failure
     environment:
       DB_HOST: mysql
