@@ -1,31 +1,287 @@
-.App {
+/* --- General App Layout & Typography (from previous update) --- */
+body {
+  margin: 0;
+  background-color: #f0f2f5;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 20px 0;
+}
+
+.todo-container {
+  max-width: 600px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px;
+  font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
   text-align: center;
+  color: #2c3e50;
+  margin-bottom: 30px;
+  font-size: 2.2em;
+}
+
+/* --- Input and Button (Add ToDo Form) --- */
+.add-todo-form {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.todo-input {
+  flex-grow: 1;
+  padding: 12px 18px;
+  border: 1px solid #dcdcdc;
+  border-radius: 6px;
+  font-size: 1.1em;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.todo-input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.add-button {
+  padding: 12px 25px;
+  background-color: #3498db;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1.1em;
+  font-weight: bold;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.add-button:hover:not(:disabled) {
+  background-color: #2980b9;
+  transform: translateY(-1px);
+}
+
+.add-button:disabled {
+  background-color: #bdc3c7;
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+/* --- Messages (Error, Loading, Empty State) --- */
+.error-message {
+  color: #e74c3c;
+  text-align: center;
+  margin-top: 15px;
+  font-weight: bold;
+}
+
+.loading-message {
+  text-align: center;
+  color: #666;
+  margin-top: 15px;
+  font-style: italic;
+}
+
+.empty-state {
+  text-align: center;
+  color: #7f8c8d;
+  margin-top: 30px;
+  font-size: 1.1em;
+  padding: 20px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+/* --- ToDo List Items --- */
+.todo-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 30px;
+}
+
+.todo-item {
+  background-color: #f8f8f8;
+  border: 1px solid #ecf0f1;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.todo-item:hover {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.todo-item.completed {
+  background-color: #e8f6f8;
+  text-decoration: line-through;
+  color: #95a5a6;
+  opacity: 0.9;
+}
+
+.todo-title {
+  cursor: pointer;
+  flex-grow: 1;
+  padding-right: 15px;
+  font-size: 1.1em;
+  word-break: break-word;
+}
+
+.todo-actions { /* New: Wrapper for buttons on todo item */
+    display: flex;
+    gap: 8px; /* Space between buttons */
+}
+
+/* --- New: Edit Specific Styles --- */
+.edit-mode-controls {
+    flex-grow: 1;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.edit-input {
+    flex-grow: 1;
+    padding: 8px 12px;
+    border: 1px solid #3498db;
+    border-radius: 4px;
+    font-size: 1em;
+    outline: none;
+}
+
+.edit-input:focus {
+    box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.3);
+}
+
+/* Base styles for action buttons (Edit, Delete, Save, Cancel) */
+.todo-actions button,
+.edit-mode-controls button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: bold;
+    transition: background-color 0.2s ease;
+}
+
+/* Specific button colors */
+.edit-button {
+    background-color: #f39c12; /* Orange */
+    color: white;
+}
+.edit-button:hover {
+    background-color: #e67e22; /* Darker orange */
+}
+
+.delete-button {
+  background-color: #e74c3c; /* Red */
+  color: white;
+}
+.delete-button:hover {
+  background-color: #c0392b; /* Darker red */
+}
+
+.save-button {
+    background-color: #27ae60; /* Green */
+    color: white;
+}
+.save-button:hover:not(:disabled) {
+    background-color: #229954; /* Darker green */
+}
+.save-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.cancel-button {
+    background-color: #95a5a6; /* Gray */
+    color: white;
+}
+.cancel-button:hover {
+    background-color: #7f8c8d; /* Darker gray */
+}
+
+/* --- Responsive Adjustments (from previous update) --- */
+@media (max-width: 768px) {
+  .todo-container {
+    margin: 20px;
+    padding: 20px;
+  }
+  h1 {
+    font-size: 1.8em;
+  }
+  .add-todo-form {
+    flex-direction: column;
+    gap: 15px;
+  }
+  .add-button {
+    width: 100%;
+  }
+  .todo-item {
+    flex-direction: column;
+    align-items: flex-start;
+    padding-bottom: 10px;
+  }
+  .todo-title {
+    padding-right: 0;
+    margin-bottom: 10px;
+  }
+  .todo-actions, .edit-mode-controls { /* Adjust buttons for small screens */
+    width: 100%;
+    justify-content: flex-end; /* Align buttons to the right */
+    margin-top: 10px;
+  }
+  .edit-input {
+      width: 100%; /* Make edit input full width */
+      margin-bottom: 10px; /* Space below edit input */
+  }
+}
+
+/* --- Existing Boilerplate (can be removed if not used elsewhere) --- */
+/* (This section contains classes from your original App.css that are not used by the current App.js) */
+/* You can safely delete these if they don't apply to other parts of your project */
+.App {
+  /* text-align: center; */
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+  /* height: 40vmin; */
+  /* pointer-events: none; */
 }
 
 @media (prefers-reduced-motion: no-preference) {
   .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+    /* animation: App-logo-spin infinite 20s linear; */
   }
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  /* background-color: #282c34; */
+  /* min-height: 100vh; */
+  /* display: flex; */
+  /* flex-direction: column; */
+  /* align-items: center; */
+  /* justify-content: center; */
+  /* font-size: calc(10px + 2vmin); */
+  /* color: white; */
 }
 
 .App-link {
-  color: #61dafb;
+  /* color: #61dafb; */
 }
 
 @keyframes App-logo-spin {
