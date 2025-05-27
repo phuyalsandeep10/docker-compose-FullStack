@@ -25,10 +25,10 @@ let db;
 async function initDb() {
   try {
     db = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
+      host: process.env.DB_HOST || localhost,
+      user: process.env.DB_USER || dockerhub,
+      password: process.env.DB_PASSWORD || sandy123,
+      database: process.env.DB_NAME || docker,
       port: process.env.MYSQL_PORT || 3306,
     });
     console.log('✅ Connected to MySQL');
@@ -120,7 +120,7 @@ app.use((err, req, res, next) => {
 
 (async () => {
   await initDb();
-  app.listen(port, '0.0.0.0', () => {
+  app.listen(port, '127.0.0.1', () => {
     console.log(`🚀 Server running on http://0.0.0.0:${port}`);
   });
 })();

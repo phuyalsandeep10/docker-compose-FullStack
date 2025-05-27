@@ -1,4 +1,4 @@
-version: "3.8"
+
 
 services:
   mysql:
@@ -22,7 +22,7 @@ services:
       - todo-net
 
   backend:
-    image: abhishekkarki88/todo-backend
+    image: backendimage/todo-backend
     restart: on-failure
     environment:
       DB_HOST: mysql
@@ -32,7 +32,7 @@ services:
     depends_on:
       - mysql
     ports:
-      - "5000:5000"
+      - "5001:5000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 10s
@@ -42,12 +42,12 @@ services:
       - todo-net
 
   frontend:
-    image: abhishekkarki88/todo-frontend
+    image: frontendimage/todo-frontend
     restart: on-failure
     depends_on:
       - backend
     ports:
-      - "3000:80"
+      - "80:80"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost"]
       interval: 10s
