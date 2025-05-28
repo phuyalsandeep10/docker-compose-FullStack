@@ -35,7 +35,7 @@ jobs:
           docker build -t $DOCKER_USER/todo-frontend:latest ./frontend
           docker push $DOCKER_USER/todo-frontend:latest
 
-      - name: SSH and deploy on remote server
+      - name: SSH and deploy on EC2 
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.EC2_HOST }}
