@@ -5,14 +5,11 @@ services:
     image: mysql:8.0
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${MYSQL_DATABASE}
-      MYSQL_USER: ${MYSQL_USER}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      - .env
     volumes:
       - mysql-data:/var/lib/mysql
     ports:
-      - "3308:3306"
+      - "3306:3306"
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -22,7 +19,7 @@ services:
       - todo-net
 
   backend:
-    image: backendimage/todo-backend
+    image: phuyalsandeep10/todo-backend
     restart: on-failure
     environment:
       DB_HOST: mysql
@@ -32,7 +29,7 @@ services:
     depends_on:
       - mysql
     ports:
-      - "5001:5000"
+      - "3000:3000"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
       interval: 10s
@@ -42,7 +39,7 @@ services:
       - todo-net
 
   frontend:
-    image: frontendimage/todo-frontend
+    image: phuyalsandeep10/todo-frontend
     restart: on-failure
     depends_on:
       - backend
